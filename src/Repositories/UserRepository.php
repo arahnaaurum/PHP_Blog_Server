@@ -16,7 +16,7 @@ class UserRepository implements UserRepositoryInterface
     public function __construct(private ?ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?? new SqLiteConnector();
-        $this->connection = $this->connector->getConnection(); // статическая функция же?
+        $this->connection = $this->connector->getConnection();
     }
 
 
@@ -24,13 +24,14 @@ class UserRepository implements UserRepositoryInterface
     {
         $statement = $this->connection->prepare(
             '
-                    insert into user (active, first_name, last_name, created_at)
-                    values (:active, :first_name, :last_name, :created_at)
+                    insert into user (email, active, first_name, last_name, created_at)
+                    values (:email, :active, :first_name, :last_name, :created_at)
                   '
         );
 
         $statement->execute(
             [
+                ':email' => $user->getEmail(),
                 ':active' => $user->isActive(),
                 ':first_name' => $user->getFirstName(),
                 ':last_name' => $user->getLastName(),
@@ -50,7 +51,7 @@ class UserRepository implements UserRepositoryInterface
         );
 
         $statement->execute([
-            'userId' => $id
+            ':userId' => $id
         ]);
 
         $userObj = $statement->fetch(PDO::FETCH_OBJ);
@@ -60,7 +61,32 @@ class UserRepository implements UserRepositoryInterface
             throw new UserNotFoundException("User with id:$id not found");
         }
 
-        $user = new User($userObj->first_name, $userObj->last_name);
+        return $this->mapUser($userObj);
+    }
+
+    public function getByEmail (string $email): User
+    {
+        $statement = $this->connection->prepare(
+            "select * from user where email = :email"
+        );
+
+        $statement->execute([
+            ':email' => $email
+        ]);
+
+        $userObj = $statement->fetch(PDO::FETCH_OBJ);
+
+        if(!$userObj)
+        {
+            throw new UserNotFoundException("User with email:$email not found");
+        }
+
+        return $this->mapUser($userObj);
+    }
+
+    private function mapUser(object $userObj) : User
+    {
+        $user = new User($userObj->email, $userObj->first_name, $userObj->last_name);
 
         $user
             ->setId($userObj->id)
@@ -70,6 +96,5 @@ class UserRepository implements UserRepositoryInterface
             ->setDeletedAt(($deletedAt = $userObj->deleted_at) ? new DateTime($deletedAt) : null);
 
         return $user;
-
     }
 }

@@ -8,4 +8,5 @@ interface PostRepositoryInterface
 {
     public function save(Post $post): void;
     public function get(int $id): Post;
+    public function getByTitle(string $title): Post;
 }
