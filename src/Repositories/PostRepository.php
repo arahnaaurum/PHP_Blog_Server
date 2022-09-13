@@ -38,6 +38,22 @@ class PostRepository implements PostRepositoryInterface
         );
     }
 
+    public function delete(int $id): void
+    {
+        $statement = $this->connection->prepare(
+            "delete from post where id = :postId"
+        );
+
+        $statement->execute([
+            ':postId' => $id
+        ]);
+
+        if(!$statement)
+        {
+            throw new PostNotFoundException("Post with id:$id not found");
+        }
+    }
+
     /**
      * @throws PostNotFoundException
      * @throws \Exception
