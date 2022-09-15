@@ -43,6 +43,6 @@ class Comment
 
     public function __toString()
     {
-        return $this->author . ' оставил комментарий: ' . $this->text;
+        return $this->getAuthorId() . ' оставил комментарий: ' . $this->text;
     }
 }

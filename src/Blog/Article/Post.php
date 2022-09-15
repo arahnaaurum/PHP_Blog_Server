@@ -36,6 +36,6 @@ class Post
 
     public function __toString()
     {
-        return $this->author . ' пишет: ' . $this->text;
+        return $this->getAuthorId() . ' пишет: ' . $this->text;
     }
 }

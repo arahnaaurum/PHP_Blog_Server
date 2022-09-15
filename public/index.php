@@ -1,26 +1,41 @@
 <?php
 
+use Psr\Container\ContainerInterface;
+use App\Blog\Http\Actions\ActionInterface;
+use App\Connection\ConnectorInterface;
+use App\Connection\SqLiteConnector;
+use App\Container\DIContainer;
 use App\Repositories\UserRepository;
+use App\Repositories\UserRepositoryInterface;
 use App\Repositories\PostRepository;
+use App\Repositories\PostRepositoryInterface;
 use App\Repositories\CommentRepository;
+use App\Repositories\CommentRepositoryInterface;
+use App\Repositories\PostLikeRepository;
+use App\Repositories\PostLikeRepositoryInterface;
+use App\Repositories\CommentLikeRepository;
+use App\Repositories\CommentLikeRepositoryInterface;
 
 use App\Blog\Http\Request;
 use App\Exceptions\HttpException;
 use App\Blog\Http\ErrorResponse;
 
+//это те же хэндеры (handlers)
 use App\Blog\Http\Actions\FindByEmail;
 use App\Blog\Http\Actions\FindPostById;
 use App\Blog\Http\Actions\CreatePost;
 use App\Blog\Http\Actions\DeletePost;
 use App\Blog\Http\Actions\CreateComment;
+use App\Blog\Http\Actions\AddLikeToPost;
+use App\Blog\Http\Actions\AddLikeToComment;
 
-require_once __DIR__ . '/autoload_runtime.php';
+$container = require_once __DIR__ . '/autoload_runtime.php';
 
-$userRepository = new UserRepository();
-
-$postRepository = new PostRepository();
-
-$commentRepository = new CommentRepository();
+$userRepository = $container->get(UserRepositoryInterface::class);
+$postRepository = $container->get(PostRepositoryInterface::class);
+$postLikeRepository = $container->get(PostLikeRepositoryInterface::class);
+$commentRepository = $container->get(CommentRepositoryInterface::class);
+$commentLikeRepository = $container->get(CommentLikeRepositoryInterface::class);
 
 // file_get_contents('php://input') - поток, содержащий тело запроса
 $request = new Request($_GET, $_SERVER, file_get_contents('php://input'));
@@ -50,6 +65,8 @@ $routes = [
     'POST'=> [
         '/posts/create' => new CreatePost($postRepository, $userRepository),
         '/posts/comment' => new CreateComment($commentRepository, $postRepository, $userRepository),
+        '/posts/like' => new AddLikeToPost($postLikeRepository, $postRepository, $userRepository),
+        '/comments/like' => new AddLikeToComment($commentLikeRepository, $commentRepository, $userRepository),
     ],
     'DELETE'=> [
         '/posts/delete' => new DeletePost($postRepository),
