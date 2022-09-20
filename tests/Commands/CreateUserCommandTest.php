@@ -10,33 +10,10 @@ use App\Blog\Commands\CreateUserCommand;
 use App\Repositories\UserRepositoryInterface;
 use App\User\Entities\User;
 use PHPUnit\Framework\TestCase;
+use App\DummyLogger;
 
 class CreateUserCommandTest extends TestCase
 {
-    public function testItThrowsAnExceptionWhenUserAlreadyExists(): void
-    {
-        $userRepository = new class implements UserRepositoryInterface
-        {
-            public function save(User $user): void
-            {
-            }
-            public function get(int $id): User
-            {
-                throw new UserNotFoundException("Not found");
-            }
-            public function getByEmail(string $email): User
-            {
-                return new User("mail@mail.com", "vasia", "pupkin");
-            }
-        };
-        
-        $command = new CreateUserCommand($userRepository);
-        
-        $this->expectException(CommandException::class);
-        $this->expectExceptionMessage('User already exists: email@mail.com');
-        $command->handle(new Argument(['email' => 'email@mail.com']));
-    }  
-
     private function makeUserRepository(): UserRepositoryInterface
     {
         return new class implements UserRepositoryInterface {
@@ -56,7 +33,7 @@ class CreateUserCommandTest extends TestCase
 
     public function testItRequiresLastName(): void
     {
-        $command = new CreateUserCommand($this->makeUserRepository());
+        $command = new CreateUserCommand($this->makeUserRepository(), new DummyLogger());
         $this->expectException(ArgumentException::class);
         $this->expectExceptionMessage('No such argument: last_name');
         $command->handle(new Argument([
@@ -67,7 +44,7 @@ class CreateUserCommandTest extends TestCase
 
     public function testItRequiresFirstName(): void
     {
-        $command = new CreateUserCommand($this->makeUserRepository());
+        $command = new CreateUserCommand($this->makeUserRepository(), new DummyLogger());
         $this->expectException(ArgumentException::class);
         $this->expectExceptionMessage('No such argument: first_name');
         $command->handle(new Argument(['email' => 'some@mail.com']));
@@ -98,7 +75,7 @@ class CreateUserCommandTest extends TestCase
             }
         };
         
-        $command = new CreateUserCommand($userRepository);
+        $command = new CreateUserCommand($userRepository, new DummyLogger());
         
         $command->handle(new Argument([
             'email' => 'some@mail.com',

@@ -2,6 +2,7 @@
 
 namespace Test\Actions;
 
+use App\DummyLogger;
 use PDO;
 use App\Blog\Http\Actions\FindByEmail;
 use App\Blog\Http\ErrorResponse;
@@ -42,7 +43,7 @@ class FindByEmailActionTest extends TestCase {
             }
         };
 
-        $action = new FindByEmail($userRepository);
+        $action = new FindByEmail($userRepository, new DummyLogger());
 
         $response = $action->handle($request);
 
@@ -82,7 +83,7 @@ class FindByEmailActionTest extends TestCase {
             }
         };
 
-        $action = new FindByEmail($userRepository);
+        $action = new FindByEmail($userRepository, new DummyLogger());
         $response = $action->handle($request);
         $this->assertInstanceOf(ErrorResponse::class, $response);
         $this->expectOutputString('{"success":false,"reason":"Not found"}');
@@ -140,7 +141,7 @@ class FindByEmailActionTest extends TestCase {
 
         $request = new Request(['email' => 'dashs@mail.ru'], [], '');
 
-        $action = new FindByEmail($userRepository);
+        $action = new FindByEmail($userRepository, new DummyLogger());
 
         $response = $action->handle($request);
 

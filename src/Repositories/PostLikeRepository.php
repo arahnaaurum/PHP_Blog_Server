@@ -8,12 +8,15 @@ use App\Date\DateTime;
 use App\Exceptions\PostLikeNotFoundException;
 use App\Blog\Article\PostLike;
 use PDO;
+use Psr\Log\LoggerInterface;
 
 class PostLikeRepository implements PostLikeRepositoryInterface
 {
     private PDO $connection;
 
-    public function __construct(private ?ConnectorInterface $connector = null)
+    public function __construct(
+        private LoggerInterface $logger,
+        private ?ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?? new SqLiteConnector();
         $this->connection = $this->connector->getConnection();
@@ -34,6 +37,8 @@ class PostLikeRepository implements PostLikeRepositoryInterface
                 ':post_id' => $like->getPostId(),
             ]
         );
+
+        $this->logger->info("Post " . $like->getPostId() . " liked by user " . $like->getUserId());
     }
 
     /**
@@ -54,6 +59,7 @@ class PostLikeRepository implements PostLikeRepositoryInterface
 
         if(!$likeObj)
         {
+            $this->logger->warning("Like with id:$id not found");
             throw new PostLikeNotFoundException("Like with id:$id not found");
         }
 
@@ -81,7 +87,9 @@ class PostLikeRepository implements PostLikeRepositoryInterface
 
         if(!$statement)
         {
-            throw new PostLikeNotFoundException("Likes for post with id:$id not found");
+            $this->logger->warning("No likes for post with id:$id found");
+            return $all_likes;
+//            throw new PostLikeNotFoundException("Likes for post with id:$id not found");
         }
 
         while ($statement && $likeObj = $statement->fetch(PDO::FETCH_OBJ)) {

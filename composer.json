@@ -24,7 +24,9 @@
     "require": {
         "ext-pdo": "*",
         "ext-mbstring": "*",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "monolog/monolog": "^3.2",
+        "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.20",

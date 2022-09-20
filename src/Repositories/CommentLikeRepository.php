@@ -8,12 +8,15 @@ use App\Connection\SqLiteConnector;
 use App\Exceptions\CommentLikeNotFoundException;
 use App\Repositories\CommentLikeRepositoryInterface;
 use PDO;
+use Psr\Log\LoggerInterface;
 
 class CommentLikeRepository implements CommentLikeRepositoryInterface
 {
     private PDO $connection;
 
-    public function __construct(private ?ConnectorInterface $connector = null)
+    public function __construct(
+        private LoggerInterface $logger,
+        private ?ConnectorInterface $connector = null)
     {
         $this->connector = $connector ?? new SqLiteConnector();
         $this->connection = $this->connector->getConnection();
@@ -34,6 +37,8 @@ class CommentLikeRepository implements CommentLikeRepositoryInterface
                 ':comment_id' => $like->getCommentId(),
             ]
         );
+
+        $this->logger->info("Comment " . $like->getCommentId() . " liked by user " . $like->getUserId());
     }
 
     /**
@@ -54,6 +59,7 @@ class CommentLikeRepository implements CommentLikeRepositoryInterface
 
         if(!$likeObj)
         {
+            $this->logger->warning("Like with id:$id not found");
             throw new CommentLikeNotFoundException("Like with id:$id not found");
         }
 
@@ -81,7 +87,9 @@ class CommentLikeRepository implements CommentLikeRepositoryInterface
 
         if(!$statement)
         {
-            throw new CommentLikeNotFoundException("Likes for comment with id:$id not found");
+            $this->logger->warning("No likes for comment with id:$id found");
+            return $all_likes;
+//            throw new CommentLikeNotFoundException("Likes for comment with id:$id not found");
         }
 
         while ($statement && $likeObj = $statement->fetch(PDO::FETCH_OBJ)) {

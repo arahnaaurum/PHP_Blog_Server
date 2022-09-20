@@ -10,6 +10,7 @@ use App\Exceptions\ArgumentException;
 use App\Blog\Commands\CreatePostCommand;
 use App\Repositories\PostRepositoryInterface;
 use PHPUnit\Framework\TestCase;
+use App\DummyLogger;
 
 class CreatePostCommandTest extends TestCase
 {
@@ -33,10 +34,11 @@ class CreatePostCommandTest extends TestCase
             }          
         };
         
-        $command = new CreatePostCommand($postRepository);
+        $command = new CreatePostCommand($postRepository, new DummyLogger());
         
         $this->expectException(CommandException::class);
         $this->expectExceptionMessage('Post with such title already exists: Testtitle');
+
         $command->handle(new Argument(['title' => 'Testtitle']));
     }  
 
@@ -62,7 +64,7 @@ class CreatePostCommandTest extends TestCase
 
     public function testItRequiresTitle(): void
     {
-        $command = new CreatePostCommand($this->makePostRepository());
+        $command = new CreatePostCommand($this->makePostRepository(), new DummyLogger());
         $this->expectException(ArgumentException::class);
         $this->expectExceptionMessage('No such argument: title');
         $command->handle(new Argument([
@@ -72,7 +74,7 @@ class CreatePostCommandTest extends TestCase
 
     public function testItRequiresText(): void
     {
-        $command = new CreatePostCommand($this->makePostRepository());
+        $command = new CreatePostCommand($this->makePostRepository(), new DummyLogger());
         $this->expectException(ArgumentException::class);
         $this->expectExceptionMessage('No such argument: text');
         $command->handle(new Argument([
@@ -107,7 +109,7 @@ class CreatePostCommandTest extends TestCase
             }
         };
         
-        $command = new CreatePostCommand($postRepository);
+        $command = new CreatePostCommand($postRepository, new DummyLogger());
         
         $command->handle(new Argument([
             'title' => 'Some title',

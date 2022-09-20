@@ -8,12 +8,13 @@ use App\Connection\SqLiteConnector;
 use App\Container\DIContainer;
 use App\Container\SomeClassWithoutDependencies;
 use App\Container\SomeClassWithParameter;
+use App\DummyLogger;
 use App\Repositories\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use App\Exceptions\ClassNotFoundException;
-use Couchbase\User;
 use PHPUnit\Framework\TestCase;
 use PDO;
+use Psr\Log\LoggerInterface;
 
 class DIContainerTest extends TestCase
 {
@@ -57,6 +58,7 @@ class DIContainerTest extends TestCase
     public function testItReturnsPDOConnection(): void
     {
         $container = new DIContainer();
+        $container->bind(LoggerInterface::class, new DummyLogger());
         $container->bind(
             PDO::class,
             new PDO (databaseConfig()['sqlite']['DATABASE_URL'])

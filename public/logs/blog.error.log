@@ -1,0 +1,2 @@
+[2022-09-18T12:12:35.164914+00:00] blog.ERROR: User already exists: user456@mal.com {"exception":"[object] (App\\Exceptions\\CommandException(code: 0): User already exists: user456@mal.com at C:\\Users\\Romanova\\Documents\\10. PHP\\php2\\src\\Blog\\Commands\\CreateUserCommand.php:29)"} []
+[2022-09-19T17:45:11.881212+00:00] blog.ERROR: User found with email:"exmple@mail.com" [] []

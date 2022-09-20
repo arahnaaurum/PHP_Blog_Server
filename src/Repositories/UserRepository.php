@@ -8,12 +8,17 @@ use App\Date\DateTime;
 use App\Exceptions\UserNotFoundException;
 use App\User\Entities\User;
 use PDO;
+use Psr\Log\LoggerInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
     private PDO $connection;
 
-    public function __construct(private ?ConnectorInterface $connector = null)
+    public function __construct
+    (
+        private LoggerInterface $logger,
+        private ?ConnectorInterface $connector = null
+    )
     {
         $this->connector = $connector ?? new SqLiteConnector();
         $this->connection = $this->connector->getConnection();
@@ -38,6 +43,7 @@ class UserRepository implements UserRepositoryInterface
                 ':created_at' => $user->getCreatedAt()
             ]
         );
+        $this->logger->info("User with email" . $user->getEmail() . " added to database");
     }
 
     /**
@@ -58,6 +64,7 @@ class UserRepository implements UserRepositoryInterface
 
         if(!$userObj)
         {
+            $this->logger->warning("User with id:$id not found");
             throw new UserNotFoundException("User with id:$id not found");
         }
 
@@ -78,6 +85,7 @@ class UserRepository implements UserRepositoryInterface
 
         if(!$userObj)
         {
+            $this->logger->warning("User with email:$email not found");
             throw new UserNotFoundException("User with email:$email not found");
         }
 
