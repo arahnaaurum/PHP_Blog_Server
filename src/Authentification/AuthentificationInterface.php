@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Blog\Http\Auth;
+namespace App\Authentification;
 
 use App\Blog\Http\Request;
 use App\User\Entities\User;
 
-interface IdentificationInterface
+interface AuthentificationInterface
 {
     public function user(Request $request): User;
 }

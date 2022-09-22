@@ -48,7 +48,7 @@ class PostRepositoryTest extends TestCase
                     throw new PostNotFoundException("Post with id:$id not found");
                 }
  
-                return $post = new Post($postObj->title, $postObj->text);
+                return new Post($postObj->title, $postObj->text);
             }
 
             public function getByTitle(string $title): Post
@@ -107,7 +107,7 @@ class PostRepositoryTest extends TestCase
                     throw new PostNotFoundException("Post with title:$title not found");
                 }
  
-                return $post = new Post($postObj->title, $postObj->text);
+                return new Post($postObj->title, $postObj->text);
             }
         };
 

@@ -45,7 +45,7 @@ class CommentRepositoryTest extends TestCase
                     throw new CommentNotFoundException("Comment with id:$id not found");
                 }
  
-                return $post = new Comment($commentObj->text);
+                return new Comment($commentObj->text);
             }
         };
 
@@ -85,7 +85,7 @@ class CommentRepositoryTest extends TestCase
                 {
                     throw new CommentNotFoundException("Comment with id:$id not found");
                 }
-                return new Comment('sometitle', 'sometext');
+                return new Comment('sometext');
             }
 
         };

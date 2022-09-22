@@ -23,8 +23,6 @@ $container = require_once __DIR__ . '/autoload_runtime.php';
 
 $logger = $container->get(\Psr\Log\LoggerInterface::class);
 
-var_dump($_SERVER);
-
 $userRepository = $container->get(UserRepositoryInterface::class);
 //$newCommand = new CreateUserCommand($userRepository, $logger);
 // try {

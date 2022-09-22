@@ -58,10 +58,9 @@ class PostRepository implements PostRepositoryInterface
 
         if(!$postObj)
         {
-            throw new PostNotFoundException("Post with id:$id not found");
+            $this->logger->info("Post with id $id deleted");
         }
 
-        $this->logger->info("Post with id $id deleted");
     }
 
     /**

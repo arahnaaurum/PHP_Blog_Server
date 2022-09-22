@@ -2,18 +2,15 @@
 
 namespace App\Blog\Http\Actions;
 
-use App\Blog\Http\Auth\IdentificationInterface;
-use App\Exceptions\ArgumentException;
-use App\Blog\Http\Actions\ActionInterface;
+use App\Authentification\AuthentificationInterface;
 use App\Blog\Http\ErrorResponse;
+use App\Exceptions\AuthException;
 use App\Exceptions\HttpException;
 use App\Blog\Http\Request;
 use App\Blog\Http\Response;
 use App\Blog\Http\SuccessfulResponse;
 use App\Blog\Article\Post;
 use App\Repositories\PostRepositoryInterface;
-use App\Exceptions\UserNotFoundException;
-use App\Repositories\UserRepositoryInterface;
 use Psr\Log\LoggerInterface;
 /*
 Обработка JSON запроса вида:
@@ -21,25 +18,35 @@ POST http://127.0.0.1:8000/posts/create
 Content-Type: application/json
 
 {
-  "user_id": "1",
   "title": "Some title",
   "text": "Some text"
 }
+Также могут быть необходимы поля для различных типов аутентификации:
+user_id - по id автора;
+auth_user - по мэйлу автора;
+auth_mail/auth_password - мэйл/пароль;
+
+либо заголовок Authorization: Bearer [токен] при идентификации по токену
 */
 
-class CreatePost implements ActionInterface
+class CreatePost implements CreatePostInterface
 {
 // Внедряем репозитории статей и пользователей
     public function __construct(
         private PostRepositoryInterface $postRepository,
-        private IdentificationInterface $identification,
-        private LoggerInterface $logger,
+        private AuthentificationInterface $authentication,
+        private LoggerInterface         $logger,
     ) {
     }
 
     public function handle(Request $request): Response
     {
-        $author = $this->identification->user($request);
+        try {
+            $author = $this->authentication->user($request);
+        } catch (AuthException $e) {
+            return new ErrorResponse($e->getMessage());
+        }
+
         $authorId = $author->getId();
 
      try {

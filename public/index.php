@@ -1,5 +1,17 @@
 <?php
 
+use App\Authentification\AuthentificationInterface;
+use App\Authentification\UserIdAuthentification;
+use App\Authentification\PasswordAuthentificationInterface;
+use App\Blog\Http\Actions\AddLikeToCommentInterface;
+use App\Blog\Http\Actions\AddLikeToPostInterface;
+use App\Blog\Http\Actions\CreateCommentInterface;
+use App\Blog\Http\Actions\CreatePostInterface;
+use App\Blog\Http\Actions\DeletePostInterface;
+use App\Blog\Http\Actions\LoginAction;
+use App\Blog\Http\Actions\LoginActionInterface;
+use App\Blog\Http\Actions\LogoutActionInterface;
+use App\Blog\Http\Actions\UserCreateActionInterface;
 use Psr\Container\ContainerInterface;
 use App\Blog\Http\Actions\ActionInterface;
 use App\Connection\ConnectorInterface;
@@ -29,7 +41,6 @@ use App\Blog\Http\Actions\CreateComment;
 use App\Blog\Http\Actions\AddLikeToPost;
 use App\Blog\Http\Actions\AddLikeToComment;
 
-use App\Blog\Http\Auth\UserIdIdentification;
 
 $container = require_once __DIR__ . '/autoload_runtime.php';
 
@@ -65,7 +76,8 @@ try {
 }
 
 //3.Подключаем идентификацию юзеров
-$identification = new UserIdIdentification($userRepository);
+$identification = $container->get(AuthentificationInterface::class);
+//$identification = new PasswordAuthentification($userRepository);
 
 $routes = [
     // отделяем маршруты для запросов с разными методами
@@ -74,13 +86,16 @@ $routes = [
         '/posts/show' => new FindPostById($postRepository),
     ],
     'POST'=> [
-        '/posts/create' => new CreatePost($postRepository, $identification, $logger),
-        '/posts/comment' => new CreateComment($commentRepository, $postRepository, $userRepository),
-        '/posts/like' => new AddLikeToPost($postLikeRepository, $postRepository, $userRepository),
-        '/comments/like' => new AddLikeToComment($commentLikeRepository, $commentRepository, $userRepository),
+        '/login' => $container->get(LoginActionInterface::class),
+        '/logout' => $container->get(LogoutActionInterface::class),
+        '/users/create' => $container->get(UserCreateActionInterface::class),
+        '/posts/create' => $container->get(CreatePostInterface::class),
+        '/posts/comment' => $container->get(CreateCommentInterface::class),
+        '/posts/like' => $container->get(AddLikeToPostInterface::class),
+        '/comments/like' => $container->get(AddLikeToCommentInterface::class),
     ],
     'DELETE'=> [
-        '/posts/delete' => new DeletePost($postRepository),
+        '/posts/delete' => $container->get(DeletePostInterface::class),
     ]
 
 ];
