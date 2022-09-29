@@ -81,7 +81,7 @@ class User
         string $first_name,
         string $last_name,
         string $password,
-        User $author,
+        ?User $author,
     ) : self
     {
         return new self(

@@ -24,7 +24,6 @@ class UserRepository implements UserRepositoryInterface
         $this->connection = $this->connector->getConnection();
     }
 
-
     public function save(User $user): void
     {
         $statement = $this->connection->prepare(
@@ -41,11 +40,33 @@ class UserRepository implements UserRepositoryInterface
                 ':first_name' => $user->getFirstName(),
                 ':last_name' => $user->getLastName(),
                 ':password' => $user->getPassword(),
-                ':author_id' => $user->getAuthor()->getId(),
+                ':author_id' => $user->getAuthor()?->getId(),
                 ':created_at' => $user->getCreatedAt()
             ]
         );
         $this->logger->info("User with email" . $user->getEmail() . " added to database");
+    }
+
+    public function update($id, $firstname, $lastname): void
+    {
+        $statement = $this->connection->prepare(
+            '
+                    update user
+                    set
+                    first_name = :first_name,
+                    last_name = :last_name
+                    where id = :id
+                  '
+        );
+
+        $statement->execute(
+            [
+                ':first_name' => $firstname,
+                ':last_name' => $lastname,
+                ':id' => $id
+            ]
+        );
+        $this->logger->info("User with id $id updated");
     }
 
     /**

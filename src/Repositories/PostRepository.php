@@ -7,6 +7,7 @@ use App\Connection\SqLiteConnector;
 use App\Date\DateTime;
 use App\Exceptions\PostNotFoundException;
 use App\Blog\Article\Post;
+use Exception;
 use PDO;
 use Psr\Log\LoggerInterface;
 
@@ -46,21 +47,20 @@ class PostRepository implements PostRepositoryInterface
 
     public function delete(int $id): void
     {
-        $statement = $this->connection->prepare(
-            "delete from post where id = :postId"
-        );
+        try {
+            $statement = $this->connection->prepare(
+                "delete from post where id = :postId"
+            );
 
-        $statement->execute([
-            ':postId' => $id
-        ]);
-
-        $postObj = $statement->fetch(PDO::FETCH_OBJ);
-
-        if(!$postObj)
-        {
-            $this->logger->info("Post with id $id deleted");
+            $statement->execute([
+                ':postId' => $id
+            ]);
+        } catch (\PDOException $exception) {
+            throw new PostNotFoundException(
+                $exception->getMessage(), (int)$exception->getCode()
+            );
         }
-
+            $this->logger->info("Post with id $id deleted");
     }
 
     /**
