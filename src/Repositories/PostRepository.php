@@ -7,13 +7,19 @@ use App\Connection\SqLiteConnector;
 use App\Date\DateTime;
 use App\Exceptions\PostNotFoundException;
 use App\Blog\Article\Post;
+use Exception;
 use PDO;
+use Psr\Log\LoggerInterface;
 
 class PostRepository implements PostRepositoryInterface
 {
     private PDO $connection;
 
-    public function __construct(private ?ConnectorInterface $connector = null)
+    public function __construct
+    (
+        private LoggerInterface $logger,
+        private ?ConnectorInterface $connector = null
+    )
     {
         $this->connector = $connector ?? new SqLiteConnector();
         $this->connection = $this->connector->getConnection();
@@ -36,22 +42,25 @@ class PostRepository implements PostRepositoryInterface
                 ':author_id' => $post->getAuthorId()
             ]
         );
+        $this->logger->info("Post " . $post->getTitle() . " added by author " . $post->getAuthorId());
     }
 
     public function delete(int $id): void
     {
-        $statement = $this->connection->prepare(
-            "delete from post where id = :postId"
-        );
+        try {
+            $statement = $this->connection->prepare(
+                "delete from post where id = :postId"
+            );
 
-        $statement->execute([
-            ':postId' => $id
-        ]);
-
-        if(!$statement)
-        {
-            throw new PostNotFoundException("Post with id:$id not found");
+            $statement->execute([
+                ':postId' => $id
+            ]);
+        } catch (\PDOException $exception) {
+            throw new PostNotFoundException(
+                $exception->getMessage(), (int)$exception->getCode()
+            );
         }
+            $this->logger->info("Post with id $id deleted");
     }
 
     /**
@@ -72,6 +81,7 @@ class PostRepository implements PostRepositoryInterface
 
         if(!$postObj)
         {
+            $this->logger->warning("Post with id:$id not found");
             throw new PostNotFoundException("Post with id:$id not found");
         }
 
@@ -91,10 +101,11 @@ class PostRepository implements PostRepositoryInterface
 
         if(!$postObj)
         {
+            $this->logger->warning("Post with title:$title not found");
             throw new PostNotFoundException("Post with title:$title not found");
         }
 
-        return $this->mapPost($postObj);    
+        return $this->mapPost($postObj);
     }
 
     private function mapPost(object $postObj)

@@ -21,6 +21,8 @@ class User
         private string $email,
         private string $firstName,
         private string $lastName,
+        private ?string $hashedPassword,
+        private ?User $author = null
     ) {
         $this->createdAt = new DateTime();
     }
@@ -38,6 +40,57 @@ class User
     public function getLastName(): string
     {
         return $this->lastName;
+    }
+
+    public function setPassword(?string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): self
+    {
+        $this->author = $author;
+
+        return $this;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->hashedPassword;
+    }
+
+    private static function hash(string $password, string $email): string
+    {
+        return hash('sha256', $password . $email);
+    }
+
+    public function checkPassword(string $password): bool
+    {
+        return $this->hashedPassword === self::hash($password, $this->email);
+    }
+
+    public static function createFrom (
+        string $email,
+        string $first_name,
+        string $last_name,
+        string $password,
+        ?User $author,
+    ) : self
+    {
+        return new self(
+            $email,
+            $first_name,
+            $last_name,
+            self::hash($password, $email),
+            $author
+        );
     }
 
     public function __toString()

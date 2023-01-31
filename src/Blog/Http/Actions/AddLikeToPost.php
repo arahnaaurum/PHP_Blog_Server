@@ -2,10 +2,10 @@
 
 namespace App\Blog\Http\Actions;
 
-
+use App\Authentification\AuthentificationInterface;
 use App\Blog\Article\PostLike;
+use App\Exceptions\AuthException;
 use App\Exceptions\PostLikeAlreadyExistsException;
-use App\Repositories\PostLikeRepository;
 use App\Repositories\PostLikeRepositoryInterface;
 use App\Repositories\PostRepositoryInterface;
 use App\Repositories\UserRepositoryInterface;
@@ -25,34 +25,30 @@ POST http://127.0.0.1:8000/posts/like
 Content-Type: application/json
 
 {
-"user_id": "1",
 "post_id": "1"
 }
++ данные для различных видов аутентификации юзера
 */
 
-class AddLikeToPost implements ActionInterface
+class AddLikeToPost implements AddLikeToPostInterface
 {
     public function __construct(
         private PostLikeRepositoryInterface $likeRepository,
         private PostRepositoryInterface $postRepository,
-        private UserRepositoryInterface $userRepository,
+        private AuthentificationInterface $authentication,
     ) {
     }
 
     public function handle(Request $request): Response
     {
-        //проверка юзера, ставящего лайк
+        //аутентификация юзера, ставящего лайк
         try {
-            $userId = ($request->jsonBodyField('user_id'));
-        } catch (HttpException | ArgumentException $exception) {
-            return new ErrorResponse($exception->getMessage());
-        }
-
-        try {
-            $this->userRepository->get($userId);
-        } catch (UserNotFoundException $e) {
+            $user = $this->authentication->user($request);
+        } catch (AuthException $e) {
             return new ErrorResponse($e->getMessage());
         }
+
+        $userId = $user->getId();
 
         //проверка поста, к которому относится лайк
         try {
@@ -67,8 +63,7 @@ class AddLikeToPost implements ActionInterface
             return new ErrorResponse($e->getMessage());
         }
 
-        $existingLikes = [];
-        $existingLikes = $this->likeRepository->getByPostId($postId);
+        $existingLikes = $this->likeRepository->getByPostId($postId) ? : null;
 
         // проверяем уникальность лайка
         try {

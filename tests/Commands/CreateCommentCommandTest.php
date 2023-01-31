@@ -5,7 +5,6 @@ namespace Test\Commands;
 use App\Blog\Arguments\Argument;
 use App\Blog\Article\Comment;
 use App\Exceptions\ArgumentException;
-use App\Exceptions\CommandException;
 use App\Exceptions\CommentNotFoundException;
 use App\Blog\Commands\CreateCommentCommand;
 use App\Repositories\CommentRepositoryInterface;

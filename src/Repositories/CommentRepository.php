@@ -8,12 +8,17 @@ use App\Date\DateTime;
 use App\Exceptions\CommentNotFoundException;
 use App\Blog\Article\Comment;
 use PDO;
+use Psr\Log\LoggerInterface;
 
 class CommentRepository implements CommentRepositoryInterface
 {
     private PDO $connection;
 
-    public function __construct(private ?ConnectorInterface $connector = null)
+    public function __construct
+    (
+        private LoggerInterface $logger,
+        private ?ConnectorInterface $connector = null
+    )
     {
         $this->connector = $connector ?? new SqLiteConnector();
         $this->connection = $this->connector->getConnection();
@@ -36,6 +41,7 @@ class CommentRepository implements CommentRepositoryInterface
                 ':created_at' => $comment->getCreatedAt()
             ]
         );
+        $this->logger->info("Comment to " . $comment->getPostId() . " added by user " . $comment->getAuthorId());
     }
 
     /**
@@ -56,6 +62,7 @@ class CommentRepository implements CommentRepositoryInterface
 
         if(!$commentObj)
         {
+            $this->logger->warning("Comment with id:$id not found");
             throw new CommentNotFoundException("Comment with id:$id not found");
         }
 

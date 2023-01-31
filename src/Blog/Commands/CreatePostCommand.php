@@ -8,11 +8,13 @@ use App\Repositories\PostRepositoryInterface;
 use App\Blog\Arguments\Argument;
 use App\Exceptions\CommandException;
 use App\Exceptions\PostNotFoundException;
+use Psr\Log\LoggerInterface;
 
 final class CreatePostCommand
 {
     public function __construct(
-        private PostRepositoryInterface $postRepository)
+        private PostRepositoryInterface $postRepository,
+        private LoggerInterface $logger)
     {
     }
 
@@ -23,12 +25,14 @@ final class CreatePostCommand
         {
             throw new CommandException("Post with such title already exists: $title");
         }
+        //передали обязательные значения полей для поста
         $this->postRepository->save(new Post
             (
                 $arguments->get('title'),
                 $arguments->get('text')
             )
-        ); //передали обязательные значения полей для поста
+        );
+        $this->logger->info("Post created: $title");
     }
     
     // предположим, что название поста уникально
