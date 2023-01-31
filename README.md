@@ -24,22 +24,21 @@ cli.php – дял запуска консольных команд
 
 4. Роутинг:
    Основные API-руты (см. index.php):
-    'GET':
-        '/users/show?email=[userEmail]' - поиск пользователя по email
-        '/posts/show?id=[postID]' - поиск поста по id
-    'POST':
-        '/login'
-        '/logout'
-        '/users/create' - создать нового пользователя
-        '/posts/create'- создать новый пост
-        '/posts/comment' - добавить комментарий к посту
-        '/posts/like' - добавить лайк к посту
-        '/comments/like' - добавить лайк к комментарию
-    'DELETE'
-        '/posts/delete?id=[postID]' - удалить пост
+    GET:
+        /users/show?email=[userEmail] - поиск пользователя по email
+        /posts/show?id=[postID] - поиск поста по id
+    POST:
+        /login
+        /logout
+        /users/create - создать нового пользователя
+        /posts/create - создать новый пост
+        /posts/comment - добавить комментарий к посту
+        /posts/like - добавить лайк к посту
+        /comments/like - добавить лайк к комментарию
+    DELETE:
+        /posts/delete?id=[postID] - удалить пост
 
-        Дополнительные комментарии о необходимом формате запроса при разных типах авторизации содержатся в
-        виде комментариев в файлах соответствующих действий (/src/Blog/Http/Actions).
+Дополнительные комментарии о необходимом формате запроса при разных типах авторизации содержатся в виде комментариев в файлах соответствующих действий (/src/Blog/Http/Actions).
 
 5. Паттерн DIContainer: в проект добавлен контейнер внедрения зависимостей (src/Container, /public/autoload_runtime.php)
 
