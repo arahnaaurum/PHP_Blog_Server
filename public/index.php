@@ -1,71 +1,82 @@
 <?php
 
 use App\Repositories\UserRepository;
-use App\User\Entities\User;
-use App\Blog\Commands\CreateUserCommand;
-
 use App\Repositories\PostRepository;
-use App\Blog\Article\Post;
-use App\Blog\Commands\CreatePostCommand;
-
 use App\Repositories\CommentRepository;
-use App\Blog\Article\Comment;
-use App\Blog\Commands\CreateCommentCommand;
 
-use App\Blog\Arguments\Argument;
+use App\Blog\Http\Request;
+use App\Exceptions\HttpException;
+use App\Blog\Http\ErrorResponse;
 
+use App\Blog\Http\Actions\FindByEmail;
+use App\Blog\Http\Actions\FindPostById;
+use App\Blog\Http\Actions\CreatePost;
+use App\Blog\Http\Actions\DeletePost;
+use App\Blog\Http\Actions\CreateComment;
 
 require_once __DIR__ . '/autoload_runtime.php';
 
 $userRepository = new UserRepository();
-// $newCommand = new CreateUserCommand($userRepository);
-// try {
-//     $newCommand->handle(Argument::fromArgv($argv));
-// } catch (\App\Exceptions\CommandException)
-// {
-//     echo 'User with this email already exists!';
-// }
 
 $postRepository = new PostRepository();
-// $newCommand = new CreatePostCommand($postRepository);
-// try {
-//     $newCommand->handle(Argument::fromArgv($argv));
-// } catch (\App\Exceptions\CommandException)
-// {
-//     echo 'Post with this title already exists!';
-// }
 
 $commentRepository = new CommentRepository();
-// $newCommand = new CreateCommentCommand($commentRepository);
-// $newCommand->handle(Argument::fromArgv($argv));
 
+// file_get_contents('php://input') - поток, содержащий тело запроса
+$request = new Request($_GET, $_SERVER, file_get_contents('php://input'));
 
+// 1. Получить рут из запроса
+try {
+    $path = $request->path();
+} catch (HttpException) {
+    (new ErrorResponse)->send();
+    return;
+}
 
-// для автоматической генерации юзеров, постов, комментов:
-// $faker = Faker\Factory::create();
+// 2. Получить HTTP-метод запроса
+try {
+    $method = $request->method();
+} catch (HttpException) {
+    (new ErrorResponse)->send();
+    return;
+}
 
-// $argument = $_SERVER['argv'][1];
+$routes = [
+    // отделяем маршруты для запросов с разными методами
+    'GET'=> [
+        '/users/show' => new FindByEmail($userRepository),
+        '/posts/show' => new FindPostById($postRepository),
+    ],
+    'POST'=> [
+        '/posts/create' => new CreatePost($postRepository, $userRepository),
+        '/posts/comment' => new CreateComment($commentRepository, $postRepository, $userRepository),
+    ],
+    'DELETE'=> [
+        '/posts/delete' => new DeletePost($postRepository),
+    ]
 
-// switch ($argument) {
-//     case 'user':
-//         $firstName = $faker->firstName();
-//         $lastName = $faker->lastName();
-//         $user = new User($firstName, $lastName);
-//         $userRepository->save($user);
-//         break;
-//     case 'post':
-//         $title = $faker->text(50);
-//         $text = $faker->text();
-//         $post = new Post($title, $text);
-//         $postRepository->save($post);
-//         break;
-//     case 'comment':
-//         $text = $faker->text(100);
-//         $comment = new Comment($text);
-//         $commentRepository->save($comment);
-//         break;
-//     default:
-//         break;
-// }
+];
 
-die();
+// Если у нас нет маршрутов для метода запроса - возвращаем неуспешный ответ
+if (!array_key_exists($method, $routes)) {
+    (new ErrorResponse('Not found'))->send();
+    return;
+}
+
+// Проверяем, есть ли маршрут среди маршрутов для этого метода
+if (!array_key_exists($path, $routes[$method])) {
+    (new ErrorResponse('Not found'))->send();
+    return;
+}
+
+// Выбираем действие по методу и пути
+$action = $routes[$method][$path];
+
+try {
+    $response = $action->handle($request);
+} catch (Exception $e) {
+    (new ErrorResponse($e->getMessage()))->send();
+}
+
+// Отправляем ответ, который может быть как удачным, так и неудачным
+$response->send();

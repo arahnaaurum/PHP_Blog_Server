@@ -20,6 +20,9 @@ class CreatePostCommandTest extends TestCase
             public function save(Post $post): void
             {
             }
+            public function delete(int $id): void
+            {
+            }
             public function get(int $id): Post
             {
                 throw new PostNotFoundException("Not found");
@@ -41,6 +44,9 @@ class CreatePostCommandTest extends TestCase
     {
         return new class implements PostRepositoryInterface {
             public function save(Post $post): void
+            {
+            }
+            public function delete(int $id): void
             {
             }
             public function get(int $id): Post
@@ -83,6 +89,9 @@ class CreatePostCommandTest extends TestCase
             public function save(Post $post): void
             {
                 $this->called = true; // Если метод save был вызван, меняем на true
+            }
+            public function delete(int $id): void
+            {
             }
             public function get(int $id): Post
             {

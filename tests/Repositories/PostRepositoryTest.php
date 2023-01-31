@@ -18,6 +18,9 @@ class PostRepositoryTest extends TestCase
             public function save(Post $post): void
             {
             }
+            public function delete(int $id): void
+            {
+            }
             public function get(int $id): Post
             {
                 $connector = new class implements ConnectorInterface
@@ -69,6 +72,9 @@ class PostRepositoryTest extends TestCase
             public function save(Post $post): void
             {
             }
+            public function delete(int $id): void
+            {
+            }
             public function get(int $id): Post
             {
                 throw new PostNotFoundException("Not found");
@@ -118,6 +124,9 @@ class PostRepositoryTest extends TestCase
     {
         $repository = new class implements PostRepositoryInterface {
             public function save(Post $post): void
+            {
+            }
+            public function delete(int $id): void
             {
             }
             public function get(int $id): Post
