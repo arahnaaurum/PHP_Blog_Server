@@ -39,6 +39,10 @@ use App\Repositories\PostLikeRepository;
 use App\Repositories\PostLikeRepositoryInterface;
 use App\Repositories\CommentLikeRepository;
 use App\Repositories\CommentLikeRepositoryInterface;
+use Faker\Provider\en_GB\Internet;
+use Faker\Provider\en_US\Person;
+use Faker\Provider\en_US\Text;
+use Faker\Provider\Lorem;
 use Psr\Log\LoggerInterface;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -110,4 +114,15 @@ $container->bind(LogoutActionInterface::class, LogoutAction::class);
 $container->bind(PasswordAuthentificationInterface::class,PasswordAuthentification::class);
 $container->bind(AuthentificationInterface::class,TokenAuthentification::class);
 $container->bind(LoginActionInterface::class, LoginAction::class);
+
+$faker = new \Faker\Generator();
+$faker->addProvider(new Person($faker));
+$faker->addProvider(new Text($faker));
+$faker->addProvider(new Internet($faker));
+$faker->addProvider(new Lorem($faker));
+$container->bind(
+    \Faker\Generator::class,
+    $faker
+);
+
 return $container;
