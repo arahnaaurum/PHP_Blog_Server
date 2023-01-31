@@ -6,5 +6,5 @@ use PDO;
 
 interface ConnectorInterface
 {
-    public static function getConnection(): PDO;
+    public function getConnection(): PDO;
 }

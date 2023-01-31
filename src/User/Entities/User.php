@@ -18,10 +18,16 @@ class User
     use Deleted;
 
     public function __construct(
+        private string $email,
         private string $firstName,
         private string $lastName,
     ) {
         $this->createdAt = new DateTime();
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
     }
 
     public function getFirstName(): string
@@ -37,6 +43,7 @@ class User
     public function __toString()
     {
         return
+            $this->email. ' '.
             $this->firstName. ' '.
             $this->lastName .
             ' (на сайте с ' . $this->createdAt->format('Y-m-d') . ')';

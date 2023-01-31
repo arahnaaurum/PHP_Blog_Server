@@ -49,7 +49,7 @@ class CommentRepository implements CommentRepositoryInterface
         );
 
         $statement->execute([
-            'commentId' => $id
+            ':commentId' => $id
         ]);
 
         $commentObj = $statement->fetch(PDO::FETCH_OBJ);

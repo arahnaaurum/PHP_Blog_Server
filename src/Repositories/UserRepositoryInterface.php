@@ -8,4 +8,5 @@ interface UserRepositoryInterface
 {
     public function save(User $user): void;
     public function get(int $id): User;
+    public function getByEmail(string $email): User;
 }
