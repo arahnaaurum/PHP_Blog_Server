@@ -46,7 +46,7 @@ class UserRepositoryTest extends TestCase
                     throw new UserNotFoundException("User with id:$id not found");
                 }
  
-                return $user = new User($userObj->email, $userObj->first_name, $userObj->last_name);
+                return new User($userObj->email, $userObj->first_name, $userObj->last_name, $userObj->password);
             }
 
             public function getByEmail(string $email): User
@@ -55,7 +55,7 @@ class UserRepositoryTest extends TestCase
             }
         };
 
-        $expectedUser = new User("dashs@mail.ru", "dasha", "romanova");
+        $expectedUser = new User("dashs@mail.ru", "dasha", "romanova", "");
         $receivedUser = $repository->get(1);
         
         //у двух объектов будет разное время создания, поэтому сравнивать их целиком не получится
@@ -103,11 +103,11 @@ class UserRepositoryTest extends TestCase
                     throw new UserNotFoundException("User with emai:$email not found");
                 }
  
-                return $user = new User($userObj->email, $userObj->first_name, $userObj->last_name);
+                return new User($userObj->email, $userObj->first_name, $userObj->last_name, $userObj->password);
             }
         };
 
-        $expectedUser = new User("dashs@mail.ru", "dasha", "romanova");
+        $expectedUser = new User("dashs@mail.ru", "dasha", "romanova", "");
         $receivedUser = $repository->getByEmail("dashs@mail.ru");
         
         //у двух объектов будет разное время создания, поэтому сравнивать их целиком не получится
@@ -148,7 +148,7 @@ class UserRepositoryTest extends TestCase
                 {
                     throw new UserNotFoundException("User with id:$id not found");
                 }
-                return new User('somemail', 'somename', 'somesurname');
+                return new User('somemail', 'somename', 'somesurname', "123");
             }
 
             public function getByEmail(string $email): User

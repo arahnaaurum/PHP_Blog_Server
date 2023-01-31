@@ -30,7 +30,7 @@ class CreatePostCommandTest extends TestCase
             }
             public function getByTitle(string $title): Post
             {
-                return new Post("Lorem iprsum", "lorem ipsum dolor");    
+                return new Post("Lorem ipsum", "lorem ipsum dolor");
             }          
         };
         

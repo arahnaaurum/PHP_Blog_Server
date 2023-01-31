@@ -5,60 +5,62 @@ namespace Test\Commands;
 use App\Blog\Arguments\Argument;
 use App\Exceptions\UserNotFoundException;
 use App\Exceptions\ArgumentException;
-use App\Blog\Commands\CreateUserCommand;
+use App\Console\CreateUser;
 use App\Repositories\UserRepositoryInterface;
 use App\User\Entities\User;
 use PHPUnit\Framework\TestCase;
 use App\DummyLogger;
+use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use App\Traits\ContainerTrait;
 
-class CreateUserCommandTest extends TestCase
+class CreateUserSymphonyConsoleTest extends TestCase
 {
-    private function makeUserRepository(): UserRepositoryInterface
-    {
-        return new class implements UserRepositoryInterface {
-            public function save(User $user): void
-            {
-            }
-            public function get(int $id): User
-            {
-                throw new UserNotFoundException("Not found");
-            }
-            public function getByEmail(string $email): User
-            {
-                throw new UserNotFoundException("Not found");
-            }
-        };
-    }
+    use ContainerTrait;
 
     public function testItRequiresFirstName(): void
     {
-        $command = new CreateUserCommand($this->makeUserRepository(), new DummyLogger());
-        $this->expectException(ArgumentException::class);
-        $this->expectExceptionMessage('No such argument: first_name');
-        $command->handle(new Argument(['email' => 'some@mail.com']));
+        $command = $this->getContainer()->get(CreateUser::class);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            'Not enough arguments (missing: "password, first_name, last_name").'
+        );
+        $command->run(
+            new ArrayInput(['email' => 'some@mail.com']),
+            new NullOutput());
     }
 
     public function testItRequiresLastName(): void
     {
-        $command = new CreateUserCommand($this->makeUserRepository(), new DummyLogger());
-        $this->expectException(ArgumentException::class);
-        $this->expectExceptionMessage('No such argument: last_name');
-        $command->handle(new Argument([
+        $command = $this->getContainer()->get(CreateUser::class);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            'Not enough arguments (missing: "password, last_name").'
+        );
+        $command->run(
+            new ArrayInput([
             'email' => 'some@mail.com',
             'first_name' => 'Ivan'
-        ]));
+            ]),
+            new NullOutput());
     }
 
     public function testItRequiresPassword(): void
     {
-        $command = new CreateUserCommand($this->makeUserRepository(), new DummyLogger());
-        $this->expectException(ArgumentException::class);
-        $this->expectExceptionMessage('No such argument: password');
-        $command->handle(new Argument([
+        $command = $this->getContainer()->get(CreateUser::class);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(
+            'Not enough arguments (missing: "password").'
+        );
+        $command->run(
+            new ArrayInput([
             'email' => 'some@mail.com',
             'first_name' => 'Ivan',
             'last_name' => 'Ivanov'
-        ]));
+            ]),
+            new NullOutput()
+        );
     }
 
     // Тест, проверяющий, что команда сохраняет пользователя в репозитории, вызывая метод save()
@@ -85,17 +87,17 @@ class CreateUserCommandTest extends TestCase
             }
         };
         
-        $command = new CreateUserCommand($userRepository, new DummyLogger());
+        $command = new CreateUser($userRepository);
 
-        $author = new User('@mail.com','Lex', 'Luthor', '000', null);
-
-        $command->handle(new Argument([
+        $command->run(
+            new ArrayInput([
             'email' => 'some@mail.com',
             'first_name' => 'Ivan',
             'last_name' => 'Nikitin',
-            'password' => '123',
-            'author' => $author,
-            ]));
+            'password' => '123'
+            ]),
+            new NullOutput()
+        );
         
         $this->assertTrue($userRepository->wasCalled());
     }

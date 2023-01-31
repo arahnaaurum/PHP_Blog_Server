@@ -5,19 +5,16 @@ namespace Test\Actions;
 use App\Blog\Article\Post;
 use App\Blog\Http\Actions\CreatePost;
 use PDO;
-use App\Blog\Http\Actions\FindByEmail;
 use App\Blog\Http\ErrorResponse;
 use App\Blog\Http\Request;
 use App\Blog\Http\SuccessfulResponse;
 use App\Connection\ConnectorInterface;
-use App\Exceptions\UserNotFoundException;
 use App\Exceptions\PostNotFoundException;
-use App\Repositories\UserRepositoryInterface;
 use App\Repositories\PostRepositoryInterface;
 use App\User\Entities\User;
 use PHPUnit\Framework\TestCase;
 use App\DummyLogger;
-use App\Blog\Http\Auth\IdentificationInterface;
+use App\Authentification\AuthentificationInterface;
 
 class CreatePostTest extends TestCase {
 
@@ -52,11 +49,11 @@ class CreatePostTest extends TestCase {
         };
 
         // Создаём стаб класса, отвечающего за индентификацию юзеров
-        $userIdentification = new class implements IdentificationInterface
+        $userIdentification = new class implements AuthentificationInterface
         {
             public function user(Request $request): User
             {
-                return new User ('ex@mail.com', 'Sasha', 'Petrov');
+                return new User ('ex@mail.com', 'Sasha', 'Petrov', '123');
             }
         };
 
@@ -82,11 +79,11 @@ class CreatePostTest extends TestCase {
     public function testItReturnsSuccessfulResponse(): void
     {
            // Создаём стаб класса, отвечающего за индентификацию юзеров
-        $userIdentification = new class implements IdentificationInterface
+        $userIdentification = new class implements AuthentificationInterface
         {
             public function user(Request $request): User
             {
-                $testUser = new User('somemail', 'somename', 'somesurname');
+                $testUser = new User('somemail', 'somename', 'somesurname', '123');
                 $testUser->setId(100);
                 return $testUser;
             }

@@ -47,6 +47,8 @@ class PostLikeRepositoryTest extends TestCase
                     throw new PostLikeNotFoundException("Likes for post with id:$id not found");
                 }
 
+                $all_likes = [];
+
                 while ($statement && $likeObj = $statement->fetch(PDO::FETCH_OBJ)) {
                     $like = new PostLike($likeObj->post_id);
 

@@ -132,10 +132,10 @@ class FindByEmailActionTest extends TestCase {
 
                 if(!$userObj)
                 {
-                    throw new UserNotFoundException("User with emai:$email not found");
+                    throw new UserNotFoundException("User with email:$email not found");
                 }
 
-                return $user = new User($userObj->email, $userObj->first_name, $userObj->last_name);
+                return $user = new User($userObj->email, $userObj->first_name, $userObj->last_name, $userObj->password);
             }
         };
 

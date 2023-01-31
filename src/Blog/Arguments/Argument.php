@@ -10,7 +10,7 @@ final class Argument {
     public function __construct(iterable $arguments)
     {
         foreach ($arguments as $argument => $value) {
-            $stringValue = trim((string)$value);
+            $stringValue = is_object($value) ? $value : trim((string) $value);
             if (empty($stringValue)) {
                 continue;
             }
@@ -31,7 +31,7 @@ final class Argument {
         return new self($arguments);
     }
     
-    public function get(string $argument): string
+    public function get(string $argument): mixed
     {
         if (!array_key_exists($argument, $this->arguments)) {
             throw new ArgumentException ("No such argument: $argument");

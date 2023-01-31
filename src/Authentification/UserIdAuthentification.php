@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Blog\Http\Auth;
+namespace App\Authentification;
+
 use App\Blog\Http\ErrorResponse;
 use App\Blog\Http\Request;
 use App\Exceptions\ArgumentException;
@@ -10,7 +11,7 @@ use App\Exceptions\UserNotFoundException;
 use App\Repositories\UserRepositoryInterface;
 use App\User\Entities\User;
 
-class UserIdIdentification implements IdentificationInterface
+class UserIdAuthentification implements AuthentificationInterface
 {
     public function __construct(
         private UserRepositoryInterface $userRepository
